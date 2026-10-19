@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ShelfShare</title>
+  <style>
+    :root {
+      --ink: #1c1915;
+      --muted: #5c564c;
+      --line: #e4ddd2;
+      --paper: #f6f1e8;
+      --card: #fffdf8;
+      --ok: #1f6b45;
+      --ok-bg: #e5f4eb;
+      --wait: #8a4b12;
+      --wait-bg: #f8ead6;
+      --accent: #1f4d3a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+      color: var(--ink);
+      background: var(--paper);
+    }
+    header, main { max-width: 760px; margin: 0 auto; padding: 28px 20px; }
+    header { padding-bottom: 0; }
+    h1 { font-size: 2rem; margin: 0 0 8px; letter-spacing: -0.02em; }
+    .lead { margin: 0; color: var(--muted); line-height: 1.5; }
+    .board { display: grid; gap: 12px; }
+    article {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px 16px 14px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px 16px;
+      align-items: center;
+    }
+    h2 { font-size: 1.2rem; margin: 0; }
+    .where, .note { margin: 0; color: var(--muted); }
+    .where { grid-column: 1; }
+    .note { grid-column: 1 / -1; font-size: 0.95rem; }
+    .status {
+      justify-self: end;
+      font-family: ui-sans-serif, system-ui, sans-serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 4px 8px;
+      border-radius: 999px;
+    }
+    .available { color: var(--ok); background: var(--ok-bg); }
+    .requested { color: var(--wait); background: var(--wait-bg); }
+    button {
+      font-family: ui-sans-serif, system-ui, sans-serif;
+      grid-column: 2;
+      grid-row: 2;
+      background: var(--accent);
+      color: white;
+      border: 0;
+      border-radius: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+    button:disabled { background: #cfc6ba; cursor: default; }
+    .msg { min-height: 1.2em; color: var(--muted); font-family: ui-sans-serif, system-ui, sans-serif; font-size: 0.9rem; }
+    footer { max-width: 760px; margin: 0 auto; padding: 0 20px 32px; color: var(--muted); font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>ShelfShare</h1>
+    <p class="lead">A local lend-board. These listings are fictional and only name a Hong Kong neighbourhood. Requesting an item marks it requested on this machine. No account.</p>
+    <p class="msg" id="msg" role="status"></p>
+  </header>
+  <main>
+    <div class="board" id="board"></div>
+  </main>
+  <footer>Local only. Status is stored in data/listings.json.</footer>
+  <script>
+    const board = document.getElementById("board");
+    const msg = document.getElementById("msg");
+
+    function card(item) {
+      const article = document.createElement("article");
+      const title = document.createElement("h2");
+      title.textContent = item.name + " · " + item.name_zh;
+      const badge = document.createElement("span");
+      badge.className = "status " + item.status;
+      badge.textContent = item.status;
+      const where = document.createElement("p");
+      where.className = "where";
+      where.textContent = item.neighborhood + " · " + item.neighborhood_zh;
+      const note = document.createElement("p");
+      note.className = "note";
+      note.textContent = item.note;
+      article.append(title, badge, where);
+      if (item.status === "available") {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = "Request";
+        button.addEventListener("click", () => requestItem(item.id, button));
+        article.append(button);
+      }
+      article.append(note);
+      return article;
+    }
+
+    async function load() {
+      const res = await fetch("/api/listings");
+      const data = await res.json();
+      board.replaceChildren(...data.listings.map(card));
+    }
+
+    async function requestItem(id, button) {
+      button.disabled = true;
+      msg.textContent = "Requesting…";
+      const res = await fetch("/api/listings/" + encodeURIComponent(id) + "/request", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) {
+        msg.textContent = data.error || "Request failed.";
+        button.disabled = false;
+        return;
+      }
+      msg.textContent = data.listing.name + " is now " + data.listing.status + ".";
+      await load();
+    }
+
+    load().catch((err) => { msg.textContent = String(err); });
+  </script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+[
+  {
+    "id": "drill",
+    "name": "Cordless drill",
+    "name_zh": "充电电钻",
+    "neighborhood": "Sham Shui Po",
+    "neighborhood_zh": "深水埗",
+    "note": "Two batteries and a mixed bit set.",
+    "status": "available"
+  },
+  {
+    "id": "table",
+    "name": "Folding table",
+    "name_zh": "折叠桌",
+    "neighborhood": "Tai Po",
+    "neighborhood_zh": "大埔",
+    "note": "Seats about four people and folds flat.",
+    "status": "available"
+  },
+  {
+    "id": "stove",
+    "name": "Camping stove",
+    "name_zh": "露营炉",
+    "neighborhood": "Sai Kung",
+    "neighborhood_zh": "西贡",
+    "note": "Single burner. Fuel canister not included.",
+    "status": "available"
+  },
+  {
+    "id": "ladder",
+    "name": "Step ladder",
+    "name_zh": "人字梯",
+    "neighborhood": "Kwun Tong",
+    "neighborhood_zh": "观塘",
+    "note": "Four steps, for indoor use.",
+    "status": "available"
+  }
+]
